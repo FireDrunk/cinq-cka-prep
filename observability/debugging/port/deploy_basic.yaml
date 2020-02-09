@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  probe-demo
+  labels:
+    name:  probe-demo
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+
+  selector:
+    matchLabels:
+      app: probe-demo
+
+  template:
+    metadata:
+      labels:
+        app:  probe-demo
+
+    spec:
+      restartPolicy: Always
+
+      containers:
+        - name:  probe-demo
+
+          image:  firedrunk/probe-demo:latest
+          
+          resources:
+            requests:
+              cpu: "1"
+              memory: "55M"
+            limits:
+              cpu: "2"
+              memory: "1G"
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 3000
+            # Wait 10 seconds before starting to probe
+            initialDelaySeconds: 10
+
+            # Run a probe every 5 seconds
+            periodSeconds: 5
+
+            # Timeout the probe after 4 (good practice to keep it below periodSeconds)
+            timeoutSeconds: 4
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            # Wait 5 seconds before starting to probe
+            initialDelaySeconds: 1
+
+            # Wait for (x) times to consider the startup a failure
+            failureThreshold: 1
+
+            # Wait for (x) times to consider the startup a success
+            successThreshold: 2
+
+            # Allow the probe to take up to 10 seconds
+            timeoutSeconds: 10            
+          
+          env:
+            - name: LIVENESS_DELAY
+              value: "0"
+            - name: READINESS_DELAY
+              value: "0"
+
+          ports:
+          - containerPort:  3000
+            name:  http
