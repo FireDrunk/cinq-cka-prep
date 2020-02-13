@@ -1,13 +1,30 @@
 # Install metrics-server
+```
 minikube addons disable metrics-server
 git clone https://github.com/kubernetes-sigs/metrics-server
-Edit deployment in metrics-server/deploy/kubernetes/metrics-server-deployment.yaml
+cd metrics-server/deploy/kubernetes/
+```
 
+Edit metrics-server-deployment.yaml
 ```        args:
           - --cert-dir=/tmp
           - --secure-port=4443
           - --kubelet-insecure-tls
           - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+```
+Deploy the metrics server:
+```
+kubectl apply -f .
+```
+
+Deploy the test application:
+```
+kubectl apply -f deploy_basic.yaml -f svc.yaml
+```
+
+Deploy the HPA:
+```
+kubectl apply -f hpa.yaml
 ```
 
 Start a shell:
